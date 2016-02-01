@@ -7,9 +7,10 @@ Created on Fri Jan 29 15:37:59 2016
 
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
-m, n = 2, 3
-pq = np.array([[1,1], [0,3]])
+m, n = 3, 13
+pq = np.array([[.75,1], [2,11]])
 POINT, VECT = 0, 1
 X, Y = 0,1
 numCrosses = 0
@@ -26,26 +27,30 @@ def hasArea(points):
                                 Must use exactly 3 points.')
     matrix = np.ones([3,3])
     for i in xrange(len(points)):
-        matrix[i][0:2] = points[i]
+        matrix[i][:2] = points[i]
         
     return abs(np.linalg.det(matrix)) > EPSILON
     
-def areColinear(line1, line2):
+def areParallel(line1, line2):
     p2 = line1[POINT] + line1[VECT]
     p4 = line2[POINT] + line2[VECT]
     return not (hasArea((line1[POINT], p2, line2[POINT])) or
             hasArea((line1[POINT], p2, p4)))
 
 def getLineConst(line, cLine):
+    if(areParallel(line, cLine)):
+        return None
     return (np.cross((line[POINT] - cLine[POINT]), line[VECT])/
             (1.0*np.cross(cLine[VECT], (line[VECT]))))
         
 def getTU(uLine, tLine):
     return getLineConst(uLine, tLine), getLineConst(tLine, uLine)
 
+def linePlot(line, style):
+    plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
+          line[POINT][Y]+line[VECT][Y]], style)
+
 intersection = np.array([0,0])
-
-
 
 
 for j in xrange(m+n-1):
@@ -56,7 +61,7 @@ for j in xrange(m+n-1):
             collisions.append(intersection)
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
             w = getLineConst(travelSegment, pq)
-            if(w > 0 and w < 1): numCrosses += 1
+            if(not(w is None) and w > 0 and w < 1): numCrosses += 1
             travel[0] = intersection
             if side%2:
                 travel[VECT][X] *= -1
@@ -69,10 +74,18 @@ assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))
 for c in collisions:
     print c
     
-print 'NumCrosses: ' + str(numCrosses)
+print '\nNumCrosses: ' + str(numCrosses)
 
 p1 = np.array([0,0])
 p2 = np.array([3,0])
 p3 = np.array([3,4])
 
-print getArea((p1, p2, p3))
+collisions = np.array(collisions)
+
+plt.axis([-m/10.0, m+m/10.0, -n/10.0, n+n/10.0])
+
+for side in table:
+    linePlot(side, 'k-')
+
+plt.plot(collisions[:,0], collisions[:,1], 'b-')
+linePlot(pq, 'g-')
