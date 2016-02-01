@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 POINT, VECT = 0, 1
 X, Y = 0,1
 EPSILON = 0.001
+ANGLE_EPS = np.cos(.001) #0.001 radians (0.06 degrees) tolerance for perpendicular lines
 
 m, n = 2, 3
 p = np.array([0.5, 1])
@@ -43,10 +44,14 @@ def areColinear(line1, line2):
             hasArea((line1[POINT], p2, p4)))
 
 def areParallel(line1, line2):
-    pass
+    perpVect = np.array([-line1[VECT][Y], line1[VECT][X]])
+    #Farin-Hansford eq 3.14
+    cosTheda = (np.dot(perpVect, line2[VECT])/
+                (np.linalg.norm(perpVect)*np.linalg.norm(line2[VECT])))
+    return cosTheda < ANGLE_EPS
 
 def getLineConst(line, cLine):
-    if(areColinear(line, cLine)):
+    if(areParallel(line, cLine)):
         return None
     return (np.cross((line[POINT] - cLine[POINT]), line[VECT])/
             (1.0*np.cross(cLine[VECT], (line[VECT]))))
@@ -79,7 +84,7 @@ for j in xrange(m+n-1):
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
                 
             travel[0] = intersection
-            #left or right side mirrow about Y else mirror about X
+            #if left or right side of table mirror about Y else mirror about X
             if side%2:
                 travel[VECT][X] *= -1
             else:
@@ -112,6 +117,4 @@ plt.plot(crossings[:,0], crossings[:,1], 'ro')
 
 v = p1
 w = p2
-print 'V,W'
-ct = np.dot(v, w)/np.linalg.norm(v)
-print ct
+print areParallel(table[0], table[2])
