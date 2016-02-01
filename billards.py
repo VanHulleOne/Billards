@@ -36,14 +36,17 @@ def hasArea(points):
         
     return abs(np.linalg.det(matrix)) > EPSILON
     
-def areParallel(line1, line2):
+def areColinear(line1, line2):
     p2 = line1[POINT] + line1[VECT]
     p4 = line2[POINT] + line2[VECT]
     return not (hasArea((line1[POINT], p2, line2[POINT])) or
             hasArea((line1[POINT], p2, p4)))
 
+def areParallel(line1, line2):
+    pass
+
 def getLineConst(line, cLine):
-    if(areParallel(line, cLine)):
+    if(areColinear(line, cLine)):
         return None
     return (np.cross((line[POINT] - cLine[POINT]), line[VECT])/
             (1.0*np.cross(cLine[VECT], (line[VECT]))))
@@ -92,8 +95,8 @@ print '\nNumCrosses: ' + str(numCrosses)
 for c in crossings:
     print c
 
-p1 = np.array([0,0])
-p2 = np.array([3,0])
+p1 = np.array([2,1])
+p2 = np.array([1.5,2])
 p3 = np.array([3,4])
 
 collisions = np.array(collisions)
@@ -107,3 +110,8 @@ plt.plot(collisions[:,0], collisions[:,1], 'b-')
 linePlot(pq, 'g-')
 plt.plot(crossings[:,0], crossings[:,1], 'ro')
 
+v = p1
+w = p2
+print 'V,W'
+ct = np.dot(v, w)/np.linalg.norm(v)
+print ct
