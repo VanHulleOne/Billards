@@ -9,8 +9,8 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-m, n = 3, 13
-pq = np.array([[.75,1], [2,11]])
+m, n = 2, 13
+pq = np.array([[1,1], [2,2]])
 POINT, VECT = 0, 1
 X, Y = 0,1
 numCrosses = 0
@@ -51,6 +51,7 @@ def linePlot(line, style):
           line[POINT][Y]+line[VECT][Y]], style)
 
 intersection = np.array([0,0])
+crossings = []
 
 
 for j in xrange(m+n-1):
@@ -59,10 +60,15 @@ for j in xrange(m+n-1):
         if t >= 0 and t <= 1 and u > 0:
             intersection = table[side][POINT] + t * table[side][VECT]
             collisions.append(intersection)
+            
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
             w = getLineConst(travelSegment, pq)
-            if(not(w is None) and w > 0 and w < 1): numCrosses += 1
+            if(not(w is None) and w > 0 and w < 1):
+                numCrosses += 1
+                crossings.append(np.array(pq[POINT] + w*pq[VECT]))
+                
             travel[0] = intersection
+            #left or right side mirrow about Y else mirror about X
             if side%2:
                 travel[VECT][X] *= -1
             else:
@@ -75,6 +81,8 @@ for c in collisions:
     print c
     
 print '\nNumCrosses: ' + str(numCrosses)
+for c in crossings:
+    print c
 
 p1 = np.array([0,0])
 p2 = np.array([3,0])
