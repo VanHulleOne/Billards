@@ -9,18 +9,23 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-m, n = 2, 13
-pq = np.array([[1,1], [2,2]])
 POINT, VECT = 0, 1
 X, Y = 0,1
-numCrosses = 0
 EPSILON = 0.001
+
+m, n = 2, 3
+p = np.array([0.5, 1])
+q = np.array([2, 10])
+pq = np.array([p, q-p])
 
 #lines are of the form startPoint, vector from start to end point
 table = np.array([[[0,0], [m,0]], [[m,0],[0,n]], [[m,n], [-m,0]], [[0,n],[0,-n]]])
 
+numCrosses = 0
 collisions = [np.array([0.,0.])]
 travel = np.array([[0,0], [1,1]])
+intersection = np.array([0,0])
+crossings = []
 
 def hasArea(points):
     if len(points) != 3: raise Exception('getArea(points) Illegal number of points. \
@@ -50,9 +55,12 @@ def linePlot(line, style):
     plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
           line[POINT][Y]+line[VECT][Y]], style)
 
-intersection = np.array([0,0])
-crossings = []
-
+#test to see if line pq goes beyond the table
+#does not check if pq starts outside of the table
+for side in table:
+    t = getLineConst(side, pq)
+    if t > 0 and t < 1:
+        pq[VECT] *= t
 
 for j in xrange(m+n-1):
     for side in xrange(len(table)):
@@ -89,7 +97,7 @@ p2 = np.array([3,0])
 p3 = np.array([3,4])
 
 collisions = np.array(collisions)
-
+crossings = np.array(crossings)
 plt.axis([-m/10.0, m+m/10.0, -n/10.0, n+n/10.0])
 
 for side in table:
@@ -97,3 +105,5 @@ for side in table:
 
 plt.plot(collisions[:,0], collisions[:,1], 'b-')
 linePlot(pq, 'g-')
+plt.plot(crossings[:,0], crossings[:,1], 'ro')
+
