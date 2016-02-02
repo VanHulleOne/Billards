@@ -12,20 +12,20 @@ import matplotlib.pyplot as plt
 POINT, VECT = 0, 1
 X, Y = 0,1
 EPSILON = 0.001
-ANGLE_EPS = np.cos(.001) #0.001 radians (0.06 degrees) tolerance for perpendicular lines
+ANGLE_EPS = np.cos(np.pi/2.0-.001) #0.001 radians (0.06 degrees) tolerance for perpendicular lines
 
-m, n = 2, 3
-p = np.array([0.5, 1])
-q = np.array([2, 10])
+m, n = 3, 7
+p = np.array([1, 1], float)
+q = np.array([2, 10], float)
 pq = np.array([p, q-p])
 
 #lines are of the form startPoint, vector from start to end point
-table = np.array([[[0,0], [m,0]], [[m,0],[0,n]], [[m,n], [-m,0]], [[0,n],[0,-n]]])
+table = np.array([[[0,0], [m,0]], [[m,0],[0,n]], [[m,n], [-m,0]], [[0,n],[0,-n]]], float)
 
 numCrosses = 0
-collisions = [np.array([0.,0.])]
-travel = np.array([[0,0], [1,1]])
-intersection = np.array([0,0])
+collisions = [np.array([0,0], float)]
+travel = np.array([[0,0], [1,1]], float)
+intersection = np.array([0,0], float)
 crossings = []
 
 def hasArea(points):
@@ -48,7 +48,7 @@ def areParallel(line1, line2):
     #Farin-Hansford eq 3.14
     cosTheda = (np.dot(perpVect, line2[VECT])/
                 (np.linalg.norm(perpVect)*np.linalg.norm(line2[VECT])))
-    return cosTheda < ANGLE_EPS
+    return abs(cosTheda) < ANGLE_EPS
 
 def getLineConst(line, cLine):
     if(areParallel(line, cLine)):
@@ -79,7 +79,7 @@ for j in xrange(m+n-1):
             
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
             w = getLineConst(travelSegment, pq)
-            if(not(w is None) and w > 0 and w < 1):
+            if(not(w is None) and w > EPSILON and w < 1-EPSILON):
                 numCrosses += 1
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
                 
@@ -90,9 +90,7 @@ for j in xrange(m+n-1):
             else:
                 travel[VECT][Y] *= -1
 
-assert(len(collisions) == m+n)
-assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))          
-
+print 'Collison Points:'
 for c in collisions:
     print c
     
@@ -100,12 +98,16 @@ print '\nNumCrosses: ' + str(numCrosses)
 for c in crossings:
     print c
 
+assert(len(collisions) == m+n)
+assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))          
+
+
 p1 = np.array([2,1])
 p2 = np.array([1.5,2])
 p3 = np.array([3,4])
 
-collisions = np.array(collisions)
-crossings = np.array(crossings)
+collisions = np.asarray(collisions)
+crossings = np.asarray(crossings)
 plt.axis([-m/10.0, m+m/10.0, -n/10.0, n+n/10.0])
 
 for side in table:
@@ -113,8 +115,6 @@ for side in table:
 
 plt.plot(collisions[:,0], collisions[:,1], 'b-')
 linePlot(pq, 'g-')
-plt.plot(crossings[:,0], crossings[:,1], 'ro')
 
-v = p1
-w = p2
-print areParallel(table[0], table[2])
+if len(crossings) > 0:
+    plt.plot(crossings[:,0], crossings[:,1], 'ro')
