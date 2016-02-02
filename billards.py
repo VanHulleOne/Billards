@@ -14,9 +14,9 @@ X, Y = 0,1
 EPSILON = 0.001
 ANGLE_EPS = np.cos(np.pi/2.0-.001) #0.001 radians (0.06 degrees) tolerance for perpendicular lines
 
-m, n = 3, 7
-p = np.array([1, 1], float)
-q = np.array([2, 10], float)
+m, n = 3, 5
+p = np.array([.2, .1], float)
+q = np.array([2.7, 4.97], float)
 pq = np.array([p, q-p])
 
 #lines are of the form startPoint, vector from start to end point
@@ -63,6 +63,18 @@ def linePlot(line, style):
     plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
           line[POINT][Y]+line[VECT][Y]], style)
 
+def isOnLine(line, t):
+    t_Epsilon = EPSILON/np.linalg.norm(line[VECT])
+    return not(t < t_Epsilon or t > 1-t_Epsilon)
+    
+def gcd(a, b):
+    t = 0
+    while(b != 0):
+        t = a
+        a = b
+        b = t%b
+    return a
+    
 #test to see if line pq goes beyond the table
 #does not check if pq starts outside of the table
 for side in table:
@@ -70,7 +82,7 @@ for side in table:
     if t > 0 and t < 1:
         pq[VECT] *= t
 
-for j in xrange(m+n-1):
+for j in xrange((m+n)/gcd(m,n)-1):
     for side in xrange(len(table)):
         t, u = getTU(travel, table[side])
         if t >= 0 and t <= 1 and u > 0:
@@ -79,7 +91,7 @@ for j in xrange(m+n-1):
             
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
             w = getLineConst(travelSegment, pq)
-            if(not(w is None) and w > EPSILON and w < 1-EPSILON):
+            if(not(w is None) and isOnLine(pq, w)):
                 numCrosses += 1
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
                 
@@ -98,7 +110,7 @@ print '\nNumCrosses: ' + str(numCrosses)
 for c in crossings:
     print c
 
-assert(len(collisions) == m+n)
+assert(len(collisions) == (m+n)/gcd(m,n))
 assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))          
 
 
