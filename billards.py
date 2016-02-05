@@ -9,35 +9,91 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
+
+#Lines are stored in the form [start point, vector to end point]
+#These constants call the start point (POINT) or vector (VECT)
 POINT, VECT = 0, 1
+#Constants for the X and Y of a point/vector
 X, Y = 0,1
+#Error amount used for distance checks (or EPSILON^2 for area checks)
 EPSILON = 0.001
-ANGLE_EPS = np.cos(np.pi/2.0-.001) #0.001 radians (0.06 degrees) tolerance for perpendicular lines
+#0.001 radians (0.06 degrees) tolerance for perpendicular lines
+ANGLE_EPS = np.cos(np.pi/2.0-.001) 
 
-m, n = 3, 5
-p = np.array([.2, .1], float)
-q = np.array([2.7, 4.97], float)
-pq = np.array([p, q-p])
+"""
+The following three variables are for user input.
 
-#lines are of the form startPoint, vector from start to end point
-table = np.array([[[0,0], [m,0]], [[m,0],[0,n]], [[m,n], [-m,0]], [[0,n],[0,-n]]], float)
+m, n are the lengths of the table sides. From the problem they must
+be co-prime integers.
 
-numCrosses = 0
-collisions = [np.array([0,0], float)]
-travel = np.array([[0,0], [1,1]], float)
-intersection = np.array([0,0], float)
-crossings = []
+The two points p, q are the start and end points of the line of the table.
+They are stored in Numpy arrays of type float and are of the form [x, y]
+p = start point of the line on the table in the form [x, y]
+q = end point of the line on the table als [x, y]
+
+"""
+m, n = 3, 7 #Lengths of the table sides
+p = np.array([.2, .1], float) #start point of line pq
+q = np.array([2.7, 4.97], float) #end point of line pq
+
+
+pq = np.array([p, q-p]) #the line pq in the form used in this program
+
+def gcd(a, b):
+    """
+    gcd takes in two numbers, makes sure they are both integers and then
+    determines their greatest common denominator using the Euclid method.
+    """
+    if not isinstance(a+b, int):
+        raise Exception('User input error. Variables m and n must be integers.')
+    t = 0
+    while(b != 0):
+        t = a
+        a = b
+        b = t%b
+    return a
+
+gcd = gcd(m,n) #determine the gcd of m and n
+#if the side lengths are not co-prime raise an Exception
+if gcd != 1:
+    raise Exception(('Invalid table dimensions (m, n). %d and %d are not ' + 
+                        'co-prime. GCD = %d') %(m, n, gcd))
+
+#lines are of the form [startPoint, vector from start to end point]
+#the Numpy array storing the sides of the table
+table = np.array([[[0,0], [m,0]], [[m,0],[0,n]],
+                  [[m,n], [-m,0]], [[0,n],[0,-n]]], float)
+
+numCrosses = 0 #Accumulates the number of times the line pq is crossed
+collisions = [np.array([0,0], float)] #Stores the points where the ball hits the edges of the table
+travel = np.array([[0,0], [1,1]], float) #the current travel path of the ball
+intersection = np.array([0,0], float) #The current place where the ball hit the bumper
+crossings = [] #the points where the ball crosses pq
 
 def hasArea(points):
-    if len(points) != 3: raise Exception('getArea(points) Illegal number of points. \
-                                Must use exactly 3 points.')
-    matrix = np.ones([3,3])
+    """
+    This method takes in a list of three points and determines if they form
+    a triangle with an area greater than EPSILON. If the results is False
+    then we know that the points are co-linear. The test is performed by
+    placing the three points into a 3x3 matrix with 1's in the third column
+    and finding the determinant of that matrix (which is actually x2 the area).
+    """
+    #Make sure the list has three points
+    if len(points) != 3:
+        raise Exception('getArea(points) Illegal number of ' + 
+                        'points. Must use exactly 3 points.')
+                        
+    matrix = np.ones([3,3]) #initialize the 3x3 matrix with 1's
     for i in xrange(len(points)):
+        #for each point in the list place its point and vector into the matrix
         matrix[i][:2] = points[i]
-        
-    return abs(np.linalg.det(matrix)) > EPSILON
+    #If the abs of the area of the triangle is greater the EPSILON^2 return True
+    return abs(np.linalg.det(matrix)) > EPSILON**2
     
 def areColinear(line1, line2):
+    """
+    areColinear takes in 
+    """
     p2 = line1[POINT] + line1[VECT]
     p4 = line2[POINT] + line2[VECT]
     return not (hasArea((line1[POINT], p2, line2[POINT])) or
@@ -63,17 +119,11 @@ def linePlot(line, style):
     plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
           line[POINT][Y]+line[VECT][Y]], style)
 
-def isOnLine(line, t):
+def isOnLineSegment(line, t):
     t_Epsilon = EPSILON/np.linalg.norm(line[VECT])
     return not(t < t_Epsilon or t > 1-t_Epsilon)
     
-def gcd(a, b):
-    t = 0
-    while(b != 0):
-        t = a
-        a = b
-        b = t%b
-    return a
+
     
 #test to see if line pq goes beyond the table
 #does not check if pq starts outside of the table
@@ -82,7 +132,7 @@ for side in table:
     if t > 0 and t < 1:
         pq[VECT] *= t
 
-for j in xrange((m+n)/gcd(m,n)-1):
+for j in xrange(m+n-1):
     for side in xrange(len(table)):
         t, u = getTU(travel, table[side])
         if t >= 0 and t <= 1 and u > 0:
@@ -91,7 +141,7 @@ for j in xrange((m+n)/gcd(m,n)-1):
             
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
             w = getLineConst(travelSegment, pq)
-            if(not(w is None) and isOnLine(pq, w)):
+            if(not(w is None) and isOnLineSegment(pq, w)):
                 numCrosses += 1
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
                 
@@ -110,7 +160,7 @@ print '\nNumCrosses: ' + str(numCrosses)
 for c in crossings:
     print c
 
-assert(len(collisions) == (m+n)/gcd(m,n))
+assert(len(collisions) == (m+n))
 assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))          
 
 
