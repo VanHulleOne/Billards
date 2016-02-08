@@ -44,8 +44,19 @@ EPSILON = np.linalg.norm([m,n])*0.001
 
 def gcd(a, b):
     """
+    returns greatest common denominator of a and b
+    
     gcd takes in two numbers, makes sure they are both integers and then
     determines their greatest common denominator using the Euclid method.
+    
+    Parameters
+    ----------
+    a - first integer
+    b - second integer
+    
+    Return
+    ------
+    a - the greatest common denominator
     """
     if not isinstance(a+b, int):
         raise Exception('User input error. Variables m and n must be integers.')
@@ -75,6 +86,8 @@ crossings = [] # the points where the ball crosses pq
 
 def areParallel(line1, line2):
     """
+    returns True if the two lines are parallel
+    
     This method tests if two lines are parallel by finding the angle
     between the perpendicular vector of the first line and the second line.
     If the dot product between perpVect and the vect of line2 is zero then
@@ -83,6 +96,15 @@ def areParallel(line1, line2):
     Farin-Hansford Geometry Toolbox is used to compute the cosine of the angle
     and compare that to our ANGLE_EPS. If cosTheda < ANGLE_EPS then the lines
     are parallel.
+    
+    Parameters
+    ----------
+    line1 - the first line
+    line2 - the second line
+    
+    Return
+    ------
+    True if lines are parallel within ANGLE_EPS else False
     """
     # A vector perpendicular to line1
     perpVect = np.array([-line1[VECT][Y], line1[VECT][X]])
@@ -94,12 +116,26 @@ def areParallel(line1, line2):
 
 def getIntersectionConst(cLine, otherLine):
     """
+    returns the constant aling cLine where the two lines intersect
+    
     Given an input of two lines return the constant that when applied to the
     equation of the first line would equal the point of intersetion.
     cLine = p1^ + c*v1^ where the return is the value for c such that the equation
     equals the point of intersection between cLine and otherLine.
     The lines are first tested to see if they are parallel. If they are then None
     is return. From this colinear lines also return None.
+    
+    Parameters
+    ----------
+    cLine - the line along which the constant c will be calculated
+    otherLine - the line that potentially crosses cLine
+    
+    Return
+    ------
+    None - if the two lines are parallel
+    float - constant that when applied to the equation of cLine would produce
+            the point of intersection.
+
     """
     if(areParallel(cLine, otherLine)):
         return None
@@ -109,14 +145,27 @@ def getIntersectionConst(cLine, otherLine):
        
 def getTU(tLine, uLine):
     """
+    returns the constant of intersection of boht lines
+    
     A method to save some typing later. Get the line constants of intersection
     for both lines for getIntersectionConst() and return the two values as
-    as a tuple t,u.    
+    as a tuple t,u. 
+    
+    Parameters
+    ----------
+    tLine - the line whose constant will be returned first
+    uLine - the line whose constant will be returned second
+    
+    Return
+    ------
+    tuple - constant from tLine, constant from uLine
     """
     return getIntersectionConst(tLine, uLine), getIntersectionConst(uLine, tLine)
 
 def isOnLineSegment(line, t):
     """
+    returns True if t is appropriatly on line
+    
     The homework requirements state that intersections at the end points of a
     line are not to be counted. This method determines if the intersection is
     sufficiently in the from the end to count as a collision. EPSILON is our
@@ -124,15 +173,31 @@ def isOnLineSegment(line, t):
     This distance is divided by the length of the line segment to determine what
     value of t creates a point EPSILON away from the end. This t_Epsilon is then
     compared to the input t to return if the value is considered 'On' the line.
+    
+    Parameters
+    ----------
+    line - the input line to be tested
+    t - the constant to test if it is sufficiently on line
+    
+    Return
+    ------
+    True - if t is on the line else False
     """
     t_Epsilon = EPSILON/np.linalg.norm(line[VECT])
     return not(t < t_Epsilon or t > 1-t_Epsilon)
 
 def linePlot(line, style):
     """
+    uses pyplot to plot the line in the given style
+    
     To plot lines in pyplot the format is x1, x2, y1, y1 so this method takes
     the line format used in this program [point][VECT] and converts it to
     plot the line.
+    
+    Parameters
+    ----------
+    line - the line to be ploted
+    style - a string which is the style in which to plot the line
     """
     plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
           line[POINT][Y]+line[VECT][Y]], style)
