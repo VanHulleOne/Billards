@@ -35,7 +35,7 @@ q = end point of the line on the table als [x, y]
 """
 m, n = 3, 7 # Lengths of the table sides
 p = np.array([.2, .1], float) # start point of line pq
-q = np.array([2.7, 4.97], float) # end point of line pq
+q = np.array([2.8, 6.9], float) # end point of line pq
 
 
 pq = np.array([p, q-p]) # the line pq in the form used in this program
@@ -262,7 +262,7 @@ for c in crossings:
 # make sure that the number of collisions is correct
 assert(len(collisions) == (m+n))
 # make sure that the last collision point is in a corner
-assert(any(np.all(np.equal(line[POINT], (collisions[-1]))) for line in table))          
+assert(any(np.all(np.isclose(line[POINT], (collisions[-1]))) for line in table))   
 
 collisions = np.asarray(collisions) # convert the collisions list into a Numpy array
 crossings = np.asarray(crossings) # convert the crossings list into a Numpy array
