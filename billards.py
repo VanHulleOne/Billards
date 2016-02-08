@@ -244,7 +244,8 @@ for j in xrange(m+n-1):
                 travel[VECT][X] *= -1
             else:
                 travel[VECT][Y] *= -1
-            
+                
+            # We found the intersecting side so stop checking more sides
             break
 
 # print all of the collision points
