@@ -18,8 +18,8 @@ X, Y = 0,1
 # Error amount used for distance checks. The actual value is calculated
 #  later in the program as a function of the length of the table's diagonal.
 EPSILON = None
-# 0.001 radians (0.06 degrees) tolerance for perpendicular lines
-ANGLE_EPS = np.cos(np.pi/2.0-0.001) 
+# 0.002 radians (0.1 degrees) tolerance for perpendicular lines
+ANGLE_EPS = np.cos(np.pi/2.0-0.002) 
 
 """
 The following three variables are for user input.
