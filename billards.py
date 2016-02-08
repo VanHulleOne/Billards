@@ -10,19 +10,10 @@ import time
 import matplotlib.pyplot as plt
 
 
-# Lines are stored in the form [start point, vector to end point]
-# These constants call the start point (POINT) or vector (VECT)
-POINT, VECT = 0, 1
-# Constants for the X and Y of a point/vector
-X, Y = 0,1
-# Error amount used for distance checks. The actual value is calculated
-#  later in the program as a function of the length of the table's diagonal.
-EPSILON = None
-# 0.002 radians (0.1 degrees) tolerance for perpendicular lines
-ANGLE_EPS = np.cos(np.pi/2.0-0.002) 
-
 """
-The following three variables are for user input.
+******************************************************************************
+THE FOLLOWING FOUR VARIABLES ARE FOR USER INPUT. DO NOT CHANGE ANY
+VARIABLES OUTSIDE OF THIS SECTION.
 
 m, n are the lengths of the table sides. From the problem they must
 be co-prime integers.
@@ -37,10 +28,24 @@ m, n = 3, 7 # Lengths of the table sides
 p = np.array([.2, .1], float) # start point of line pq
 q = np.array([2.8, 6.9], float) # end point of line pq
 
+"""
+DO NOT CHANGE VARIABLES BELOW THIS LINE
+******************************************************************************
+"""
 
-pq = np.array([p, q-p]) # the line pq in the form used in this program
+# Lines are stored in the form [start point, vector to end point]
+# These constants call the start point (POINT) or vector (VECT)
+POINT, VECT = 0, 1
+# Constants for the X and Y of a point/vector
+X, Y = 0,1
+# Error amount used for distance checks. 
 # This distance tolerance is 0.1% the length of the table's diagonal.
 EPSILON = np.linalg.norm([m,n])*0.001 
+# 0.002 radians (0.1 degrees) tolerance for perpendicular lines
+ANGLE_EPS = np.cos(np.pi/2.0-0.002) 
+
+pq = np.array([p, q-p]) # the line pq in the form used in this program
+
 
 def gcd(a, b):
     """
