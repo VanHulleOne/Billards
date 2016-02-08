@@ -71,20 +71,31 @@ intersection = np.array([0,0], float) #The current place where the ball hit the 
 crossings = [] #the points where the ball crosses pq
 
 def areParallel(line1, line2):
+    """
+    This method tests if two lines are parallel by finding the angle
+    between the perpendicular vector of the first line and the second line.
+    If the dot product between perpVect and the vect of line2 is zero then
+    line1 and line2 are parallel. Farin and Hansford recommend checking within
+    a physically meaningful tolerance so equation 3.14 from pg 50 of
+    Farin-Hansford Geometry Toolbox is used to compute the cosine of the angle
+    and compare that to our ANGLE_EPS.
+    """
+    #A vector perpendicular to line1
     perpVect = np.array([-line1[VECT][Y], line1[VECT][X]])
     #Farin-Hansford eq 3.14
     cosTheda = (np.dot(perpVect, line2[VECT])/
                 (np.linalg.norm(perpVect)*np.linalg.norm(line2[VECT])))
+    #if cosTheda is < ANGLE_EPS then the lines are parallel and we return True
     return abs(cosTheda) < ANGLE_EPS
 
-def getLineConst(line, cLine):
-    if(areParallel(line, cLine)):
+def getLineConst(cLine, otherLine):
+    if(areParallel(cLine, otherLine)):
         return None
-    return (np.cross((line[POINT] - cLine[POINT]), line[VECT])/
-            (1.0*np.cross(cLine[VECT], (line[VECT]))))
+    return (np.cross((cLine[POINT] - otherLine[POINT]), cLine[VECT])/
+            (np.cross(otherLine[VECT], (cLine[VECT]))))
         
-def getTU(uLine, tLine):
-    return getLineConst(uLine, tLine), getLineConst(tLine, uLine)
+def getTU(tLine, uLine):
+    return getLineConst(tLine, uLine), getLineConst(uLine, tLine)
 
 def linePlot(line, style):
     plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
@@ -99,19 +110,19 @@ def isOnLineSegment(line, t):
 #test to see if line pq goes beyond the table
 #does not check if pq starts outside of the table
 for side in table:
-    t = getLineConst(side, pq)
+    t = getLineConst(pq, side)
     if t > 0 and t < 1:
         pq[VECT] *= t
 
 for j in xrange(m+n-1):
     for side in xrange(len(table)):
-        t, u = getTU(travel, table[side])
+        t, u = getTU(table[side], travel)
         if t >= 0 and t <= 1 and u > 0:
             intersection = table[side][POINT] + t * table[side][VECT]
             collisions.append(intersection)
             
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
-            w = getLineConst(travelSegment, pq)
+            w = getLineConst(pq, travelSegment)
             if(not(w is None) and isOnLineSegment(pq, w)):
                 numCrosses += 1
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
