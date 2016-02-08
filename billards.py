@@ -15,10 +15,11 @@ import matplotlib.pyplot as plt
 POINT, VECT = 0, 1
 #Constants for the X and Y of a point/vector
 X, Y = 0,1
-#Error amount used for distance checks (or EPSILON^2 for area checks)
-EPSILON = 0.001
+#Error amount used for distance checks. The actual value is calculated
+#later in the program as a function of the length of the table's diagonal.
+EPSILON = None
 #0.001 radians (0.06 degrees) tolerance for perpendicular lines
-ANGLE_EPS = np.cos(np.pi/2.0-.001) 
+ANGLE_EPS = np.cos(np.pi/2.0-0.001) 
 
 """
 The following three variables are for user input.
@@ -38,6 +39,8 @@ q = np.array([2.7, 4.97], float) #end point of line pq
 
 
 pq = np.array([p, q-p]) #the line pq in the form used in this program
+#This distance tolerance is 0.1% the length of the table's diagonal.
+EPSILON = np.linalg.norm([m,n])*0.001 
 
 def gcd(a, b):
     """
@@ -78,7 +81,8 @@ def areParallel(line1, line2):
     line1 and line2 are parallel. Farin and Hansford recommend checking within
     a physically meaningful tolerance so equation 3.14 from pg 50 of
     Farin-Hansford Geometry Toolbox is used to compute the cosine of the angle
-    and compare that to our ANGLE_EPS.
+    and compare that to our ANGLE_EPS. If cosTheda < ANGLE_EPS then the lines
+    are parallel.
     """
     #A vector perpendicular to line1
     perpVect = np.array([-line1[VECT][Y], line1[VECT][X]])
@@ -88,29 +92,55 @@ def areParallel(line1, line2):
     #if cosTheda is < ANGLE_EPS then the lines are parallel and we return True
     return abs(cosTheda) < ANGLE_EPS
 
-def getLineConst(cLine, otherLine):
+def getIntersectionConst(cLine, otherLine):
+    """
+    Given an input of two lines return the constant that when applied to the
+    equation of the first line would equal the point of intersetion.
+    cLine = p1^ + c*v1^ where the return is the value for c such that the equation
+    equals the point of intersection between cLine and otherLine.
+    The lines are first tested to see if they are parallel. If they are then None
+    is return. From this colinear lines also return None.
+    """
     if(areParallel(cLine, otherLine)):
         return None
+    # return ([Po-Pc] X Vo) / (Vc X Vo) 
     return (np.cross((otherLine[POINT] - cLine[POINT]), otherLine[VECT])/
-            (1.0*np.cross(cLine[VECT], (otherLine[VECT]))))
-        
+            (np.cross(cLine[VECT], (otherLine[VECT]))))
+       
 def getTU(tLine, uLine):
-    return getLineConst(tLine, uLine), getLineConst(uLine, tLine)
-
-def linePlot(line, style):
-    plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
-          line[POINT][Y]+line[VECT][Y]], style)
+    """
+    A method to save some typing later. Get the line constants of intersection
+    for both lines for getIntersectionConst() and return the two values as
+    as a tuple t,u.    
+    """
+    return getIntersectionConst(tLine, uLine), getIntersectionConst(uLine, tLine)
 
 def isOnLineSegment(line, t):
+    """
+    The homework requirements state that intersections at the end points of a
+    line are not to be counted. This method determines if the intersection is
+    sufficiently in the from the end to count as a colision. EPSILON is our
+    distance error and is a percentage of the length fo the table's diagonal.
+    This distance is divided by the length of the line segment to determine what
+    value of t creates a point EPSILON away from the end. This t_Epsilon is then
+    compared to the input t to return if the value is considered 'On' the line.
+    """
     t_Epsilon = EPSILON/np.linalg.norm(line[VECT])
     return not(t < t_Epsilon or t > 1-t_Epsilon)
-    
 
+def linePlot(line, style):
+    """
+    To plot lines in pyplot the format is x1, x2, y1, y1 so this method takes
+    the line format used in this program [point][VECT] and converts it to
+    plot the line.
+    """
+    plt.plot([line[POINT][X], line[POINT][X]+line[VECT][X]], [line[POINT][Y],
+          line[POINT][Y]+line[VECT][Y]], style)
     
 #test to see if line pq goes beyond the table
 #does not check if pq starts outside of the table
 for side in table:
-    t = getLineConst(pq, side)
+    t = getIntersectionConst(pq, side)
     if t > 0 and t < 1:
         pq[VECT] *= t
 
@@ -122,7 +152,7 @@ for j in xrange(m+n-1):
             collisions.append(intersection)
             
             travelSegment = np.array([travel[POINT], intersection-travel[POINT]])
-            w = getLineConst(pq, travelSegment)
+            w = getIntersectionConst(pq, travelSegment)
             if(not(w is None) and isOnLineSegment(pq, w)):
                 numCrosses += 1
                 crossings.append(np.array(pq[POINT] + w*pq[VECT]))
