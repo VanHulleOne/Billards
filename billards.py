@@ -91,8 +91,8 @@ def areParallel(line1, line2):
 def getLineConst(cLine, otherLine):
     if(areParallel(cLine, otherLine)):
         return None
-    return (np.cross((cLine[POINT] - otherLine[POINT]), cLine[VECT])/
-            (np.cross(otherLine[VECT], (cLine[VECT]))))
+    return (np.cross((otherLine[POINT] - cLine[POINT]), otherLine[VECT])/
+            (1.0*np.cross(cLine[VECT], (otherLine[VECT]))))
         
 def getTU(tLine, uLine):
     return getLineConst(tLine, uLine), getLineConst(uLine, tLine)
