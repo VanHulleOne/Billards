@@ -70,35 +70,6 @@ travel = np.array([[0,0], [1,1]], float) #the current travel path of the ball
 intersection = np.array([0,0], float) #The current place where the ball hit the bumper
 crossings = [] #the points where the ball crosses pq
 
-def hasArea(points):
-    """
-    This method takes in a list of three points and determines if they form
-    a triangle with an area greater than EPSILON. If the results is False
-    then we know that the points are co-linear. The test is performed by
-    placing the three points into a 3x3 matrix with 1's in the third column
-    and finding the determinant of that matrix (which is actually x2 the area).
-    """
-    #Make sure the list has three points
-    if len(points) != 3:
-        raise Exception('getArea(points) Illegal number of ' + 
-                        'points. Must use exactly 3 points.')
-                        
-    matrix = np.ones([3,3]) #initialize the 3x3 matrix with 1's
-    for i in xrange(len(points)):
-        #for each point in the list place its point and vector into the matrix
-        matrix[i][:2] = points[i]
-    #If the abs of the area of the triangle is greater the EPSILON^2 return True
-    return abs(np.linalg.det(matrix)) > EPSILON**2
-    
-def areColinear(line1, line2):
-    """
-    areColinear takes in 
-    """
-    p2 = line1[POINT] + line1[VECT]
-    p4 = line2[POINT] + line2[VECT]
-    return not (hasArea((line1[POINT], p2, line2[POINT])) or
-            hasArea((line1[POINT], p2, p4)))
-
 def areParallel(line1, line2):
     perpVect = np.array([-line1[VECT][Y], line1[VECT][X]])
     #Farin-Hansford eq 3.14
